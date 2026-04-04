@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Контакты — Аркадий Марков, фотограф</title>
+  <meta name="description" content="Свяжитесь с фотографом Аркадием Марковым — напишите в Telegram, заполните форму или позвоните. Отвечаю в течение часа.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & Variables ───────────────────────── */
+    :root {
+      --bg:     #FAF8F5;
+      --bg2:    #F0EDE8;
+      --text:   #2C1A0E;
+      --text2:  #8C7B72;
+      --accent: #B07D5E;
+      --footer: #1A110A;
+      --white:  #FFFFFF;
+      --serif:  'Cormorant Garamond', Georgia, serif;
+      --sans:   'Inter', system-ui, sans-serif;
+      --ease:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --r:      10px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); overflow-x: hidden; cursor: none; }
+    body.no-scroll { overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Cursor ──────────────────────────────────── */
+    .cursor { position: fixed; width: 10px; height: 10px; background: var(--text); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .3s, height .3s; mix-blend-mode: multiply; }
+    .cursor-ring { position: fixed; width: 36px; height: 36px; border: 1.5px solid var(--text); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: width .35s var(--ease), height .35s var(--ease); opacity: .35; }
+    .cursor.big { width: 6px; height: 6px; }
+    .cursor-ring.big { width: 56px; height: 56px; opacity: .15; }
+    @media (max-width: 768px) { .cursor, .cursor-ring { display: none; } body { cursor: auto; } }
+
+    /* ── Scroll progress ─────────────────────────── */
+    .scroll-progress { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(to right, var(--accent), #c9956e); z-index: 1000; width: 0%; transition: width .08s linear; }
+
+    /* ── Toast ───────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--text); color: var(--white);
+      padding: 14px 28px; border-radius: 100px;
+      font-size: 13px; font-weight: 400; letter-spacing: .03em;
+      z-index: 9000; transition: transform .4s var(--ease), opacity .4s;
+      opacity: 0; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ── Container & Typography ──────────────────── */
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 60px; }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 300; line-height: 1.1; }
+    .label { font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 32px;
+      font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+      border: 1.5px solid var(--text); background: var(--text); color: var(--white);
+      cursor: none; transition: background .28s var(--ease), color .28s var(--ease); border-radius: 4px;
+    }
+    .btn:hover { background: transparent; color: var(--text); }
+    .btn-outline { background: transparent; color: var(--text); }
+    .btn-outline:hover { background: var(--text); color: var(--white); }
+    .btn svg { width: 14px; height: 14px; transition: transform .2s; }
+    .btn:hover svg { transform: translateX(3px); }
+
+    /* ── Header ──────────────────────────────────── */
+    .header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+      padding: 24px 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background .4s, padding .3s;
+    }
+    .header.scrolled {
+      background: rgba(250,248,245,.9);
+      backdrop-filter: blur(18px);
+      padding: 16px 60px;
+      box-shadow: 0 1px 0 rgba(44,26,14,.08);
+    }
+    .header-logo { font-family: var(--serif); font-size: 20px; font-weight: 400; letter-spacing: .04em; color: var(--text); }
+    .header-nav { display: flex; align-items: center; gap: 32px; }
+    .nav-link { font-size: 12px; font-weight: 400; letter-spacing: .1em; text-transform: uppercase; color: var(--text2); position: relative; transition: color .25s; }
+    .nav-link::after { content: ''; position: absolute; bottom: -3px; left: 0; right: 0; height: 1px; background: var(--text); transform: scaleX(0); transform-origin: left; transition: transform .3s var(--ease); }
+    .nav-link:hover, .nav-link.active { color: var(--text); }
+    .nav-link:hover::after, .nav-link.active::after { transform: scaleX(1); }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .header .btn { padding: 10px 20px; font-size: 11px; }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: none; padding: 4px; }
+    .hamburger span { display: block; width: 24px; height: 1.5px; background: var(--text); transition: transform .3s, opacity .3s; }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4.5px, 4.5px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4.5px, -4.5px); }
+
+    /* Mobile menu */
+    .mobile-menu { position: fixed; inset: 0; background: var(--bg); z-index: 850; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity .35s var(--ease); }
+    .mobile-menu.open { opacity: 1; pointer-events: all; }
+    .mobile-menu a { font-family: var(--serif); font-size: 40px; font-weight: 300; color: var(--text); opacity: 0; transform: translateY(20px); transition: opacity .35s, transform .35s, color .2s; }
+    .mobile-menu.open a { opacity: 1; transform: none; }
+    .mobile-menu.open a:nth-child(1) { transition-delay: .08s; }
+    .mobile-menu.open a:nth-child(2) { transition-delay: .14s; }
+    .mobile-menu.open a:nth-child(3) { transition-delay: .20s; }
+    .mobile-menu.open a:nth-child(4) { transition-delay: .26s; }
+    .mobile-menu.open a:nth-child(5) { transition-delay: .32s; }
+    .mobile-menu a:hover { color: var(--accent); }
+    .mobile-bottom { position: absolute; bottom: 40px; display: flex; gap: 24px; }
+    .mobile-bottom a { font-family: var(--sans) !important; font-size: 12px !important; letter-spacing: .1em; text-transform: uppercase; color: var(--text2) !important; transform: none !important; opacity: 1 !important; }
+
+    /* ── Hero mini ───────────────────────────────── */
+    .page-hero {
+      padding: 160px 0 80px;
+      background: var(--bg2);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--accent), transparent);
+      opacity: .25;
+    }
+    .page-hero .label { margin-bottom: 16px; display: block; }
+    .page-hero h1 { font-size: clamp(48px, 7vw, 88px); margin-bottom: 16px; }
+    .page-hero p { font-size: 16px; color: var(--text2); line-height: 1.7; max-width: 480px; margin: 0 auto; }
+
+    /* ── Contact section ─────────────────────────── */
+    .contact-section { padding: 96px 0 120px; }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    /* ── Form column ─────────────────────────────── */
+    .form-wrap { }
+    .form-header { margin-bottom: 40px; }
+    .form-header .label { display: block; margin-bottom: 16px; }
+    .form-header h2 { font-size: clamp(28px, 3vw, 40px); margin-bottom: 12px; }
+    .form-header p { font-size: 15px; color: var(--text2); line-height: 1.65; }
+
+    .contact-form { display: flex; flex-direction: column; gap: 20px; }
+
+    .field-group { display: flex; flex-direction: column; gap: 8px; }
+    .field-label { font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text2); }
+
+    .field-input,
+    .field-select,
+    .field-textarea {
+      width: 100%;
+      padding: 14px 18px;
+      font-family: var(--sans); font-size: 14px; font-weight: 300;
+      background: var(--bg2);
+      border: 1.5px solid transparent;
+      border-radius: var(--r);
+      color: var(--text);
+      outline: none;
+      transition: border-color .25s var(--ease), background .25s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .field-input::placeholder,
+    .field-textarea::placeholder { color: var(--text2); opacity: .55; }
+    .field-input:focus,
+    .field-select:focus,
+    .field-textarea:focus {
+      border-color: var(--accent);
+      background: var(--white);
+    }
+    .field-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238C7B72' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 18px center;
+      padding-right: 44px;
+      cursor: none;
+    }
+    .field-textarea { resize: none; min-height: 100px; line-height: 1.6; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .form-note { font-size: 12px; color: var(--text2); line-height: 1.6; opacity: .7; }
+
+    .btn-submit {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 16px 40px; width: 100%;
+      font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
+      background: var(--text); color: var(--white); border: 1.5px solid var(--text);
+      border-radius: 4px; cursor: none;
+      transition: background .28s var(--ease), color .28s var(--ease);
+    }
+    .btn-submit:hover { background: transparent; color: var(--text); }
+    .btn-submit svg { width: 15px; height: 15px; transition: transform .25s; flex-shrink: 0; }
+    .btn-submit:hover svg { transform: translateX(4px); }
+
+    /* ── Contacts column ─────────────────────────── */
+    .contacts-wrap { }
+
+    .contacts-header { margin-bottom: 40px; }
+    .contacts-header .label { display: block; margin-bottom: 16px; }
+    .contacts-header h2 { font-size: clamp(28px, 3vw, 40px); margin-bottom: 12px; }
+    .contacts-header p { font-size: 15px; color: var(--text2); line-height: 1.65; }
+
+    .contact-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+
+    .contact-card {
+      display: flex; align-items: center; gap: 16px;
+      padding: 18px 22px;
+      background: var(--bg2);
+      border-radius: var(--r);
+      border: 1.5px solid transparent;
+      transition: border-color .25s, background .25s;
+      text-decoration: none;
+    }
+    .contact-card:hover { border-color: rgba(44,26,14,.12); background: var(--white); }
+    .contact-card-icon {
+      width: 42px; height: 42px;
+      background: var(--white);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background .25s;
+    }
+    .contact-card:hover .contact-card-icon { background: var(--bg2); }
+    .contact-card-icon svg { width: 18px; height: 18px; }
+    .contact-card-body { flex: 1; }
+    .contact-card-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+    .contact-card-value { font-size: 14px; color: var(--text2); }
+    .contact-card-arrow { opacity: .25; transition: opacity .25s, transform .25s; flex-shrink: 0; }
+    .contact-card:hover .contact-card-arrow { opacity: .7; transform: translateX(3px); }
+    .contact-card-arrow svg { width: 16px; height: 16px; stroke: var(--text); fill: none; stroke-width: 1.5; stroke-linecap: round; }
+
+    /* Response time badge */
+    .response-badge {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, rgba(176,125,94,.08), rgba(176,125,94,.04));
+      border: 1.5px solid rgba(176,125,94,.2);
+      border-radius: var(--r);
+    }
+    .response-dot { width: 8px; height: 8px; background: #5cb85c; border-radius: 50%; flex-shrink: 0; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(92,184,92,.4); } 50% { box-shadow: 0 0 0 6px rgba(92,184,92,0); } }
+    .response-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+    .response-text strong { font-weight: 500; }
+
+    /* ── Divider ─────────────────────────────────── */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(44,26,14,.08), transparent);
+      margin: 0 60px;
+    }
+
+    /* ── Footer ──────────────────────────────────── */
+    footer { background: var(--footer); padding: 60px 0 36px; border-top: 1px solid rgba(255,255,255,.04); }
+    .footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
+    .footer-logo { font-family: var(--serif); font-size: 22px; font-weight: 300; color: var(--white); margin-bottom: 10px; }
+    .footer-tag { font-size: 13px; color: rgba(255,255,255,.3); line-height: 1.6; }
+    .footer-col-title { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.25); margin-bottom: 18px; }
+    .footer-nav a { display: block; font-size: 14px; color: rgba(255,255,255,.5); margin-bottom: 9px; transition: color .2s; }
+    .footer-nav a:hover { color: var(--white); }
+    .footer-socials { display: flex; flex-direction: column; gap: 9px; }
+    .footer-social { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255,255,255,.5); transition: color .2s; }
+    .footer-social:hover { color: var(--white); }
+    .footer-social svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,.05); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: rgba(255,255,255,.18); }
+
+    /* ── Telegram sticky ─────────────────────────── */
+    .tg-sticky { display: none; position: fixed; bottom: 20px; right: 20px; z-index: 800; background: var(--text); color: var(--white); padding: 14px 22px; border-radius: 100px; font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; align-items: center; gap: 8px; box-shadow: 0 8px 32px rgba(26,10,4,.25); }
+    .tg-sticky svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* ── Reveal animations ───────────────────────── */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+    .reveal.visible { opacity: 1; transform: none; }
+    .reveal-d1 { transition-delay: .1s; }
+    .reveal-d2 { transition-delay: .2s; }
+    .reveal-d3 { transition-delay: .3s; }
+    .reveal-d4 { transition-delay: .4s; }
+
+    /* ── Responsive ──────────────────────────────── */
+    @media (max-width: 1024px) {
+      .container { padding: 0 32px; }
+      .header { padding: 20px 32px; }
+      .header.scrolled { padding: 14px 32px; }
+      .contact-grid { gap: 48px; }
+      .section-divider { margin: 0 32px; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .container { padding: 0 20px; }
+      .header { padding: 18px 20px; }
+      .header.scrolled { padding: 14px 20px; }
+      .header-nav, .header-right .btn { display: none; }
+      .hamburger { display: flex; }
+      .contact-grid { grid-template-columns: 1fr; gap: 56px; }
+      .field-row { grid-template-columns: 1fr; }
+      .section-divider { margin: 0 20px; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+      .tg-sticky { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- Scroll progress -->
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ── HEADER ─────────────────────────────────── -->
+  <header class="header" id="header">
+    <a href="index.html" class="header-logo">Markoff</a>
+    <nav class="header-nav">
+      <a href="index.html#services" class="nav-link">Услуги</a>
+      <a href="portfolio.html" class="nav-link">Портфолио</a>
+      <a href="index.html#about" class="nav-link">О себе</a>
+      <a href="index.html#pricing" class="nav-link">Стоимость</a>
+      <a href="contact.html" class="nav-link active">Контакты</a>
+    </nav>
+    <div class="header-right">
+      <a href="https://t.me/ArikMarkoff" target="_blank" class="btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+        Написать
+      </a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Главная</a>
+    <a href="portfolio.html">Портфолио</a>
+    <a href="index.html#about">О себе</a>
+    <a href="index.html#pricing">Стоимость</a>
+    <a href="contact.html">Контакты</a>
+    <div class="mobile-bottom">
+      <a href="https://t.me/ArikMarkoff" target="_blank">Telegram</a>
+      <a href="https://max.ru/u/f9LHodD0cOI-2sijnPQyTMNvCBF8_QUWKjMyRxG1L9MG5eWFGpvTLlI7LAw" target="_blank">Макс</a>
+    </div>
+  </div>
+
+  <!-- ── HERO mini ───────────────────────────────── -->
+  <section class="page-hero">
+    <div class="container">
+      <span class="label reveal">Контакты</span>
+      <h1 class="reveal reveal-d1">Давайте знакомиться</h1>
+      <p class="reveal reveal-d2">Расскажите про вашу идею — я отвечу и мы всё обсудим. Без лишних слов, по-человечески.</p>
+    </div>
+  </section>
+
+  <!-- ── CONTACT SECTION ────────────────────────── -->
+  <section class="contact-section">
+    <div class="container">
+      <div class="contact-grid">
+
+        <!-- Форма -->
+        <div class="form-wrap">
+          <div class="form-header">
+            <span class="label reveal">Форма заявки</span>
+            <h2 class="reveal reveal-d1">Напишите мне</h2>
+            <p class="reveal reveal-d2">Заполните несколько полей — и я свяжусь с вами в течение часа, чтобы обсудить детали.</p>
+          </div>
+
+          <form class="contact-form reveal reveal-d3" id="contactForm" novalidate>
+
+            <div class="field-group">
+              <label class="field-label" for="name">Как вас зовут</label>
+              <input class="field-input" id="name" name="name" type="text" placeholder="Ваше имя" autocomplete="given-name" required>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="shoot-type">Тип съёмки</label>
+              <select class="field-select" id="shoot-type" name="shoot-type" required>
+                <option value="" disabled selected>Выберите направление</option>
+                <option value="portrait">Портрет</option>
+                <option value="family">Семейная съёмка</option>
+                <option value="lovestory">Лав стори</option>
+                <option value="commercial">Коммерческая съёмка</option>
+                <option value="product">Предметная съёмка</option>
+                <option value="other">Другое</option>
+              </select>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label" for="shoot-date">Желаемая дата</label>
+                <input class="field-input" id="shoot-date" name="shoot-date" type="date" required>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="city">Город</label>
+                <input class="field-input" id="city" name="city" type="text" placeholder="Москва" autocomplete="address-level2">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="contact">Telegram или телефон</label>
+              <input class="field-input" id="contact" name="contact" type="text" placeholder="@username или +7 999 000 00 00" autocomplete="tel" required>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="message">Расскажите подробнее <span style="opacity:.4">(необязательно)</span></label>
+              <textarea class="field-textarea" id="message" name="message" placeholder="Идея, место, количество людей — любые детали, которые помогут мне подготовиться"></textarea>
+            </div>
+
+            <p class="form-note">Нажимая кнопку, вы соглашаетесь на обработку персональных данных. Данные используются только для связи с вами.</p>
+
+            <button type="submit" class="btn-submit">
+              Отправить заявку
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+            </button>
+
+          </form>
+        </div>
+
+        <!-- Контакты -->
+        <div class="contacts-wrap">
+          <div class="contacts-header">
+            <span class="label reveal">Прямая связь</span>
+            <h2 class="reveal reveal-d1">Или напишите сами</h2>
+            <p class="reveal reveal-d2">Предпочитаете написать напрямую — пожалуйста. Отвечаю быстро в любом мессенджере.</p>
+          </div>
+
+          <div class="contact-cards reveal reveal-d3">
+
+            <a href="https://t.me/ArikMarkoff" target="_blank" class="contact-card">
+              <div class="contact-card-icon">
+                <!-- Telegram -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M22 2L11 13" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M22 2L15 22l-4-9-9-4 20-7z" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="contact-card-body">
+                <div class="contact-card-name">Telegram</div>
+                <div class="contact-card-value">@username</div>
+              </div>
+              <div class="contact-card-arrow">
+                <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </a>
+
+            <a href="https://max.ru/u/f9LHodD0cOI-2sijnPQyTMNvCBF8_QUWKjMyRxG1L9MG5eWFGpvTLlI7LAw" target="_blank" class="contact-card">
+              <div class="contact-card-icon">
+                <!-- Max -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                </svg>
+              </div>
+              <div class="contact-card-body">
+                <div class="contact-card-name">Макс</div>
+                <div class="contact-card-value">markoff.photo</div>
+              </div>
+              <div class="contact-card-arrow">
+                <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </a>
+
+            <a href="https://vk.com/id7091100" target="_blank" class="contact-card">
+              <div class="contact-card-icon">
+                <!-- VK -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--text)">
+                  <path d="M13.162 18.994c.609 0 .858-.406.845-1.003-.038-1.676.757-2.57 1.587-1.083C16.74 18.686 17.624 19 18.694 19h1.979c.609 0 .916-.318.733-.81-.19-.512-1.266-1.68-2.034-2.645-.505-.63-1.166-1.3-1.37-1.618-.203-.32-.174-.467.04-.757.203-.29 1.137-1.571 1.641-2.38.511-.822.777-1.436.615-1.79-.152-.337-.69-.47-1.533-.47H16.9c-.609 0-.908.307-1.065.757-.58 1.655-1.62 3.213-2.03 3.525-.391.306-.523.193-.523-.362V9.34c0-.564-.137-.838-.762-.838H10.23c-.48 0-.77.35-.77.786 0 .843 1.24.97 1.24 3.113v3.47c0 .59-.1.697-.523.697-.523 0-1.773-1.546-2.527-3.354-.436-1.05-.722-2.24-.722-2.28 0-.014-.014-.028-.014-.028C6.77 9.168 6.474 9 5.952 9H4.145c-.553 0-.77.26-.77.7 0 .812 1.534 4.833 4.043 7.215 1.953 1.87 4.57 2.807 6.744 2.807v-.728z"/>
+                </svg>
+              </div>
+              <div class="contact-card-body">
+                <div class="contact-card-name">ВКонтакте</div>
+                <div class="contact-card-value">vk.com/markoff.photo</div>
+              </div>
+              <div class="contact-card-arrow">
+                <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </a>
+
+            <a href="tel:+79152531150" class="contact-card">
+              <div class="contact-card-icon">
+                <!-- Phone -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.5 10.64a19.79 19.79 0 01-3.07-8.67A2 2 0 012.41 0h3a2 2 0 012 1.72c.127.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.76a2 2 0 012.11-.45c.91.34 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+                </svg>
+              </div>
+              <div class="contact-card-body">
+                <div class="contact-card-name">Телефон</div>
+                <div class="contact-card-value">+7 (915) 253-11-50</div>
+              </div>
+              <div class="contact-card-arrow">
+                <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </a>
+
+            <a href="mailto:arikmsk@mail.ru" class="contact-card">
+              <div class="contact-card-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+              </div>
+              <div class="contact-card-body">
+                <div class="contact-card-name">E-mail</div>
+                <div class="contact-card-value">arikmsk@mail.ru</div>
+              </div>
+              <div class="contact-card-arrow">
+                <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </a>
+
+          </div>
+
+          <div class="response-badge reveal reveal-d4">
+            <div class="response-dot"></div>
+            <div class="response-text">
+              <strong>Отвечаю быстро</strong> — обычно в течение часа. Работаю каждый день с 9:00 до 22:00.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ── FOOTER ─────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">Markoff</div>
+          <p class="footer-tag">Фотограф Аркадий Марков<br>Портрет · Семья · Лав стори<br>Коммерция · Предметка</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Навигация</div>
+          <nav class="footer-nav">
+            <a href="index.html">Главная</a>
+            <a href="portfolio.html">Портфолио</a>
+            <a href="index.html#pricing">Стоимость</a>
+            <a href="contact.html">Контакты</a>
+          </nav>
+        </div>
+        <div>
+          <div class="footer-col-title">Связь</div>
+          <div class="footer-socials">
+            <a href="https://t.me/ArikMarkoff" target="_blank" class="footer-social">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+              Telegram
+            </a>
+            <a href="https://max.ru/u/f9LHodD0cOI-2sijnPQyTMNvCBF8_QUWKjMyRxG1L9MG5eWFGpvTLlI7LAw" target="_blank" class="footer-social">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              Макс
+            </a>
+            <a href="https://vk.com/id7091100" target="_blank" class="footer-social">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M13.162 18.994c.609 0 .858-.406.845-1.003-.038-1.676.757-2.57 1.587-1.083C16.74 18.686 17.624 19 18.694 19h1.979c.609 0 .916-.318.733-.81-.19-.512-1.266-1.68-2.034-2.645-.505-.63-1.166-1.3-1.37-1.618-.203-.32-.174-.467.04-.757.203-.29 1.137-1.571 1.641-2.38.511-.822.777-1.436.615-1.79-.152-.337-.69-.47-1.533-.47H16.9c-.609 0-.908.307-1.065.757-.58 1.655-1.62 3.213-2.03 3.525-.391.306-.523.193-.523-.362V9.34c0-.564-.137-.838-.762-.838H10.23c-.48 0-.77.35-.77.786 0 .843 1.24.97 1.24 3.113v3.47c0 .59-.1.697-.523.697-.523 0-1.773-1.546-2.527-3.354-.436-1.05-.722-2.24-.722-2.28 0-.014-.014-.028-.014-.028C6.77 9.168 6.474 9 5.952 9H4.145c-.553 0-.77.26-.77.7 0 .812 1.534 4.833 4.043 7.215 1.953 1.87 4.57 2.807 6.744 2.807v-.728z"/></svg>
+              ВКонтакте
+            </a>
+            <a href="tel:+79152531150" class="footer-social">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.5 10.64a19.79 19.79 0 01-3.07-8.67A2 2 0 012.41 0h3a2 2 0 012 1.72c.127.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.76a2 2 0 012.11-.45c.91.34 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+              +7 (915) 253-11-50
+            </a>
+            <a href="mailto:arikmsk@mail.ru" class="footer-social">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              arikmsk@mail.ru
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Аркадий Марков. Все права защищены.</span>
+        <span>Фотограф · Москва</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Mobile Telegram sticky -->
+  <a href="https://t.me/ArikMarkoff" target="_blank" class="tg-sticky" id="tgSticky">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+    Написать
+  </a>
+
+  <script>
+    /* ── Cursor ──────────────────────────────────── */
+    const cursor     = document.getElementById('cursor');
+    const cursorRing = document.getElementById('cursorRing');
+    let cx = -100, cy = -100, rx = -100, ry = -100;
+    document.addEventListener('mousemove', e => { cx = e.clientX; cy = e.clientY; });
+    (function animCursor() {
+      rx += (cx - rx) * .14;
+      ry += (cy - ry) * .14;
+      cursor.style.left     = cx + 'px';
+      cursor.style.top      = cy + 'px';
+      cursorRing.style.left = rx + 'px';
+      cursorRing.style.top  = ry + 'px';
+      requestAnimationFrame(animCursor);
+    })();
+    document.querySelectorAll('a, button, .contact-card, .field-input, .field-select, .field-textarea').forEach(el => {
+      el.addEventListener('mouseenter', () => { cursor.classList.add('big'); cursorRing.classList.add('big'); });
+      el.addEventListener('mouseleave', () => { cursor.classList.remove('big'); cursorRing.classList.remove('big'); });
+    });
+
+    /* ── Scroll progress ─────────────────────────── */
+    const prog = document.getElementById('scrollProgress');
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      prog.style.width = (window.scrollY / h * 100) + '%';
+    }, { passive: true });
+
+    /* ── Header on scroll ───────────────────────── */
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 40);
+    }, { passive: true });
+
+    /* ── Mobile menu ─────────────────────────────── */
+    const hamburger  = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      const open = mobileMenu.classList.toggle('open');
+      hamburger.classList.toggle('open', open);
+      document.body.classList.toggle('no-scroll', open);
+    });
+    mobileMenu.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        mobileMenu.classList.remove('open');
+        hamburger.classList.remove('open');
+        document.body.classList.remove('no-scroll');
+      });
+    });
+
+    /* ── Reveal on scroll ────────────────────────── */
+    const revealObs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+    /* ── Toast ───────────────────────────────────── */
+    const toast = document.getElementById('toast');
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    /* ── Form submit ─────────────────────────────── */
+    const form = document.getElementById('contactForm');
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      // Простая проверка обязательных полей
+      const name    = form.querySelector('#name').value.trim();
+      const type    = form.querySelector('#shoot-type').value;
+      const contact = form.querySelector('#contact').value.trim();
+
+      if (!name || !type || !contact) {
+        showToast('Заполните обязательные поля');
+        return;
+      }
+
+      // Имитация отправки
+      const btn = form.querySelector('.btn-submit');
+      btn.textContent = 'Отправляю...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        form.reset();
+        btn.innerHTML = `Отправить заявку <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>`;
+        btn.disabled = false;
+        showToast('Отлично! Напишу вам в течение часа');
+      }, 1200);
+    });
+
+    /* ── Magnetic buttons ────────────────────────── */
+    document.querySelectorAll('.btn, .btn-submit, .contact-card').forEach(btn => {
+      btn.addEventListener('mousemove', e => {
+        const r   = btn.getBoundingClientRect();
+        const dx  = e.clientX - (r.left + r.width  / 2);
+        const dy  = e.clientY - (r.top  + r.height / 2);
+        btn.style.transform = `translate(${dx * .12}px, ${dy * .12}px)`;
+      });
+      btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+    });
+  </script>
+</body>
+</html>

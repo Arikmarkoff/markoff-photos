@@ -1,0 +1,6 @@
+providers:
+  - name: openai
+    api_key: sk-proj-ваш_ключ_сюда
+    chat_model: gpt-4o
+    autocomplete_model: gpt-4o
+    edit_model: gpt-4o
